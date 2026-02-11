@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using EMS.Api.Models;
 using EMS.Api.Data;
 
@@ -7,6 +8,7 @@ namespace EMS.Api.Controllers
 {
     [ApiController]
     [Route("api/employees")]
+    [Authorize]
     public class EmployeesController : ControllerBase
     {
         private readonly AppDbContext _db;
