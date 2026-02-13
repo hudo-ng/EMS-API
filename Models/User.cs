@@ -10,5 +10,8 @@ namespace EMS.Api.Models
 
         [Required]
         public string PasswordHash { get; set; } = "";
+
+        [Required]
+        public List<UseRole> UserRoles { get; set; } = new();
     }
 }

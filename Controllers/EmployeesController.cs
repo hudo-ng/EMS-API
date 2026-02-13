@@ -18,6 +18,7 @@ namespace EMS.Api.Controllers
             _db = db;
         }
 
+        [Authorize(Roles = "Admin,Manager, HR")]
         [HttpGet]
         public async Task<IEnumerable<Employee>> GetAll()
         {
@@ -35,6 +36,7 @@ namespace EMS.Api.Controllers
             return Ok(employee);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateEmployee(int id, Employee updatedEmployee)
         {
@@ -57,6 +59,7 @@ namespace EMS.Api.Controllers
             return Ok(updatedEmployee);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateEmployee(Employee employee)
         {
@@ -75,6 +78,7 @@ namespace EMS.Api.Controllers
             return Ok(employee);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {

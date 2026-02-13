@@ -33,8 +33,18 @@ public class AuthController : ControllerBase
             return BadRequest("Username already exists.");
         }
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
+
+        var role = await _db.Roles.FirstOrDefaultAsync(r => r.RoleName == "Staff");
+        if (role == null)
+        {
+            return BadRequest("Default role not found.");
+        }
+
+        var userRole = new UseRole { User = user, Role = role };
+        _db.UserRoles.Add(userRole);
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
+
         return Ok("User registered successfully.");
     }
 
@@ -66,11 +76,21 @@ public class AuthController : ControllerBase
         var securityKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtKey));
         var credentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(securityKey, Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256);
 
+        var roles = _db.UserRoles
+            .Where(ur => ur.UserId == user.Id)
+            .Select(ur => ur.Role.RoleName)
+            .ToList();
+
         var claims = new[]
         {
             new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.Username),
-            new System.Security.Claims.Claim("UserId", user.Id.ToString())
+            new System.Security.Claims.Claim("UserId", user.Id.ToString()),
         };
+
+        foreach (var role in roles)
+        {
+            claims = [.. claims, new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, role)];
+        }
 
         var token = new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(
             issuer: jwtIssuer,
