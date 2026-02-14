@@ -18,13 +18,14 @@ namespace EMS.Api.Controllers
             _db = db;
         }
 
-        [Authorize(Roles = "Admin,Manager, HR")]
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IEnumerable<Employee>> GetAll()
         {
             return await _db.Employees.ToListAsync();
         }
 
+        [Authorize(Roles = "Admin,Manager,Staff")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -32,6 +33,13 @@ namespace EMS.Api.Controllers
             if (employee == null)
             {
                 return NotFound("Employee not found");
+            }
+            if (User.IsInRole("Staff"))
+            {
+                if (employee.UserId != int.Parse(User.Claims.First(c => c.Type == "UserId").Value))
+                {
+                    return Forbid("You can only access your own employee record");
+                }
             }
             return Ok(employee);
         }
